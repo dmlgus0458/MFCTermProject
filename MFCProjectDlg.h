@@ -1,4 +1,4 @@
-﻿
+
 // MFCProjectDlg.h: 헤더 파일
 //
 
@@ -42,11 +42,11 @@ public:
 	afx_msg void OnBnClickedCancel();
 	CStatic m_staticDisp;
 	CStatic m_score;
-	int m_count = 30;
-	int m_hint_flag = 13;
+	CStatic m_hintflag;
+	int m_count = 50;//게임 제한시간 설정
+	int m_hint_flag = 3;//힌트횟수 설정
 	int m_total_score;
 	int m_current_score;
 	int m_cardcount = 0;
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-
 };
