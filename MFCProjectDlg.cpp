@@ -17,22 +17,20 @@
 
 
 
-CMFCProjectDlg::CMFCProjectDlg(CWnd* pParent /*=nullptr*/)
+CMFCProjectDlg::CMFCProjectDlg(CWnd* pParent /*=nullptr*/) 
 	: CDialogEx(IDD_MFCPROJECT_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	for (int i = 0; i < 36; i++) {
-		m_game_table[i] = i % 18;	
+	//게임에 쓸 카드 이미지의 순서를 실제 게임 테이블에 쓸 m_game_table 배열에 저장한다
+	for (int i = 0; i < 36; i++) {				
+		m_game_table[i] = i % 18;	//같은 카드를 짝을 맞추는 게임이기 때문에 0~17까지 전체 카드를 2번 저장해준다
 	}
-
-	srand((unsigned int)time(NULL));
-
-	int first_choice, second_choice, temp;
-
-	for (int i = 0; i < 35; i++) {
-		first_choice = rand() % 36;	
+	srand((unsigned int)time(NULL));//rand함수 쓸 때 srand함수를 같이 써주지 않으면 '랜덤'의 패턴이 똑같이 발생해서 모든게임에 카드 배치가 같아진다
+	int first_choice, second_choice, temp;//카드를 섞기위한 변수 선언
+	//카드의 순서를 섞어주지 않으면 순서대로 나열되어 있기 때문에 섞어준다
+	for (int i = 0; i < 35; i++) {	//카드를 36번 섞는다
+		first_choice = rand() % 36;	//0~35 까지 랜덤한 수가 들어간다
 		second_choice = rand() % 36;
-
 		temp = m_game_table[first_choice];
 		m_game_table[first_choice] = m_game_table[second_choice];
 		m_game_table[second_choice] = temp;
@@ -44,6 +42,7 @@ void CMFCProjectDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_STATIC_DISP, m_staticDisp);
 	DDX_Control(pDX, ID_SCORE, m_score);
+	DDX_Control(pDX, ID_hintflag, m_hintflag);
 }
 
 BEGIN_MESSAGE_MAP(CMFCProjectDlg, CDialogEx)
@@ -71,7 +70,7 @@ BOOL CMFCProjectDlg::OnInitDialog()
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	
 	CString str;
-
+	//프로젝트안 res 폴더에 있는 카드이미지 들을 불러온다
 	for (int i = 0; i < 19; i++) {		
 		str.Format(L"res/%03d.bmp", i);
 		m_card_list[i].Load(str);
@@ -107,16 +106,13 @@ void CMFCProjectDlg::OnPaint()
 	}
 	else
 	{
+		//화면에 카드를 그리는 부분
 		CPaintDC dc(this);
 		char index;	
-
 		for (int i = 0; i < 36; i++) {
-			index = m_game_table[i] + 1;	
-										
+			index = m_game_table[i] + 1;			
 			if (index == 0) continue;	
-
 			if (m_front_back == 0) index = 0;	
-
 			m_card_list[index].Draw(dc, (i % 6) * 46, (i / 6) * 66);
 		}
 	}
@@ -179,7 +175,7 @@ void CMFCProjectDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 	}
 	CString current_score;
-	current_score.Format(_T("%d"), m_current_score);
+	current_score.Format(_T("점수:%d"), m_current_score);
 	m_score.SetWindowTextW(current_score);
 }
 
@@ -208,7 +204,6 @@ void CMFCProjectDlg::OnTimer(UINT_PTR nIDEvent)
 		}
 	}
 	CDialogEx::OnTimer(nIDEvent);
-	CString sTxt;
 }
 
 void CMFCProjectDlg::OnBnClickedButton1()
@@ -227,6 +222,9 @@ void CMFCProjectDlg::OnBnClickedButton1()
 			return;
 		}
 	}
+	CString current_hint;
+	current_hint.Format(_T("남은힌트수:%d"), m_hint_flag);
+	m_hintflag.SetWindowTextW(current_hint);
 }
 void CMFCProjectDlg::OnBnClickedCancel()
 {
