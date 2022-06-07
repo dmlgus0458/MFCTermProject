@@ -9,8 +9,8 @@
 class CMFCProjectDlg : public CDialogEx
 {
 private:
-	CImage m_card_list[19];
-	char m_game_table[36];	
+	CImage m_card_list[19];	//카드이미지 리스트
+	char m_game_table[36];	//카드 테이블
 	char m_front_back = 1;	//카드의 앞뒤를 확인
 	char m_card_choice = -1; //카드의 선택을 확인
 // 생성입니다.
@@ -45,8 +45,8 @@ public:
 	CStatic m_hintflag;
 	int m_count = 50;//게임 제한시간 설정
 	int m_hint_flag = 3;//힌트횟수 설정
-	int m_total_score;
-	int m_current_score;
-	int m_cardcount = 0;
+	int m_total_score;//전체점수
+	int m_current_score;//현재점수
+	int m_cardcount = 0;//카드 짝을 맞춘 개수
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };
