@@ -43,6 +43,7 @@ void CMFCProjectDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_STATIC_DISP, m_staticDisp);
+	DDX_Control(pDX, ID_SCORE, m_score);
 }
 
 BEGIN_MESSAGE_MAP(CMFCProjectDlg, CDialogEx)
@@ -116,7 +117,7 @@ void CMFCProjectDlg::OnPaint()
 
 			if (m_front_back == 0) index = 0;	
 
-			m_card_list[index].Draw(dc, (i % 6) * 36, (i / 6) * 56);
+			m_card_list[index].Draw(dc, (i % 6) * 46, (i / 6) * 66);
 		}
 	}
 }
@@ -137,10 +138,10 @@ void CMFCProjectDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	CDialogEx::OnLButtonDown(nFlags, point);
 	if (m_front_back) return;		
 
-	if (point.x < 36 * 6 && point.y < 56 * 6)
+	if (point.x < 46 * 6 && point.y < 66 * 6)
 	{
-		int x = point.x / 36;
-		int y = point.y / 56;
+		int x = point.x / 46;
+		int y = point.y / 66;
 		char num = x + y * 6;
 
 		char index = m_game_table[num] + 1;
@@ -148,7 +149,7 @@ void CMFCProjectDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		if (index == 0) return;	
 
 		CClientDC dc(this);
-		m_card_list[index].Draw(dc, x * 36, y * 56);
+		m_card_list[index].Draw(dc, x * 46, y * 66);
 
 		if (m_card_choice == -1) m_card_choice = num;	
 		else
@@ -159,16 +160,27 @@ void CMFCProjectDlg::OnLButtonDown(UINT nFlags, CPoint point)
 				{
 					m_game_table[m_card_choice] = -1;
 					m_game_table[num] = -1;
+					m_cardcount++;
+					m_current_score = m_cardcount * 5;//현재점수 = 뒤집은 카드의 개수 * 5
+					m_total_score = m_current_score + m_count * 10;//전체점수 = 뒤집은 카드의 개수 * 5 + 남은시간 * 10
 				}
 				m_card_choice = -1;
-
 				m_front_back = 1;		
-
 				SetTimer(1, 300, NULL);
-
 			}
 		}
 	}
+	if (m_cardcount == 18) {//모든 카드가 뒤집힐경우 타이머가 멈추고 게임에 승리한다
+		KillTimer(2);
+		if (MessageBox(L"게임에 이겼습니다.", L"축하합니다.", MB_OK) == IDOK) {
+			CString score;
+			score.Format(_T("당신의 점수는 %d점 입니다."), m_total_score);
+			AfxMessageBox(score);
+		}
+	}
+	CString current_score;
+	current_score.Format(_T("%d"), m_current_score);
+	m_score.SetWindowTextW(current_score);
 }
 
 
@@ -183,17 +195,16 @@ void CMFCProjectDlg::OnTimer(UINT_PTR nIDEvent)
 	}
 	if (nIDEvent == 2)
 	{
-		CString sTxt;
-		sTxt.Format(_T("%d"), m_count--);
+		CString lefttime;
+		lefttime.Format(_T("남은시간:%d"), m_count--);
 		if (m_count >= -1)
-			m_staticDisp.SetWindowTextW(sTxt);
+			m_staticDisp.SetWindowTextW(lefttime);
 		else
 			KillTimer(2);
 	}
-	if(m_count == -1){
-	int check = MessageBox(L"제한시간이 초과 되었습니다", L"시간초과", MB_OK);
-	if (check == IDOK) {
-		OnBnClickedCancel();
+	if (m_count == -1) {
+		if (MessageBox(L"제한시간이 초과 되었습니다. 게임을 종료합니다.", L"시간초과", MB_ICONSTOP) == IDOK) {
+			OnBnClickedCancel();
 		}
 	}
 	CDialogEx::OnTimer(nIDEvent);
@@ -203,11 +214,18 @@ void CMFCProjectDlg::OnTimer(UINT_PTR nIDEvent)
 void CMFCProjectDlg::OnBnClickedButton1()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	if (m_front_back) return;	
-	else{
-		m_front_back = 1;
-		Invalidate();
-		SetTimer(1, 800, NULL);
+	if (m_front_back) return;
+	else {
+		if (m_hint_flag > 0) {
+			m_front_back = 1;
+			Invalidate();
+			SetTimer(1, 800, NULL);
+			m_hint_flag--;
+		}
+		else {
+			MessageBox(L"더이상 힌트를 사용할수 없습니다.", MB_OK);
+			return;
+		}
 	}
 }
 void CMFCProjectDlg::OnBnClickedCancel()

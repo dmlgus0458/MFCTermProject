@@ -41,5 +41,12 @@ public:
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedCancel();
 	CStatic m_staticDisp;
+	CStatic m_score;
 	int m_count = 30;
+	int m_hint_flag = 13;
+	int m_total_score;
+	int m_current_score;
+	int m_cardcount = 0;
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+
 };
