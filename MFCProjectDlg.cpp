@@ -187,7 +187,7 @@ void CMFCProjectDlg::OnTimer(UINT_PTR nIDEvent)
 		if (m_count >= -1)
 			m_staticDisp.SetWindowTextW(sTxt);
 		else
-			KillTimer(1);
+			KillTimer(2);
 	}
 	if(m_count == -1){
 	int check = MessageBox(L"제한시간이 초과 되었습니다", L"시간초과", MB_OK);
