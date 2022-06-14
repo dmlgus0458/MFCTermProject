@@ -20,7 +20,20 @@
 
 <br>
 
-### 힌트 기능
+### 바 형태 및 숫자 형태의 제한시간
+
+<br>
+
+- 숫자 형태의 제한시간 채택
+
+<br>
+
+<img src="https://github.com/dmlgus0458/MFCTermProject/blob/df07ad33ba1f6120edda611be29c2d0730d26333/preview/lefttime.PNG" title="hint" alt="hint" width="50%">
+
+<br>
+<br>
+
+### 힌트 기능 및 힌트 횟수 제한
 
 <br>
 
