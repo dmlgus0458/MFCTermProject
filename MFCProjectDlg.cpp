@@ -17,12 +17,12 @@
 
 
 
-CMFCProjectDlg::CMFCProjectDlg(CWnd* pParent /*=nullptr*/) 
+CMFCProjectDlg::CMFCProjectDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_MFCPROJECT_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	//게임에 쓸 카드 이미지의 순서를 실제 게임 테이블에 쓸 m_game_table 배열에 저장한다
-	for (int i = 0; i < 36; i++) {				
+	for (int i = 0; i < 36; i++) {
 		m_game_table[i] = i % 18;	//같은 카드를 짝을 맞추는 게임이기 때문에 0~17까지 전체 카드를 2번 저장해준다
 	}
 	srand((unsigned int)time(NULL));//rand함수 쓸 때 srand함수를 같이 써주지 않으면 '랜덤'의 패턴이 똑같이 발생해서 모든게임에 카드 배치가 같아진다
@@ -40,9 +40,10 @@ CMFCProjectDlg::CMFCProjectDlg(CWnd* pParent /*=nullptr*/)
 void CMFCProjectDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_STATIC_DISP, m_staticDisp);
+	DDX_Control(pDX, IDC_STATIC_DISP, m_timer);
 	DDX_Control(pDX, ID_SCORE, m_score);
 	DDX_Control(pDX, ID_hintflag, m_hintflag);
+	DDX_Control(pDX, IDC_COMBO, m_combo_level);
 }
 
 BEGIN_MESSAGE_MAP(CMFCProjectDlg, CDialogEx)
@@ -53,6 +54,8 @@ BEGIN_MESSAGE_MAP(CMFCProjectDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &CMFCProjectDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDCANCEL, &CMFCProjectDlg::OnBnClickedCancel)
 	ON_WM_ERASEBKGND()
+	ON_WM_SIZE()
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 
@@ -68,16 +71,16 @@ BOOL CMFCProjectDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-	
+
 	CString str;
 	//프로젝트안 res 폴더에 있는 카드이미지 들을 불러온다
-	for (int i = 0; i < 19; i++) {		
+	for (int i = 0; i < 19; i++) {
 		str.Format(L"res/%03d.bmp", i);
 		m_card_list[i].Load(str);
 	}
 	SetTimer(1, 2000, NULL);
 	SetTimer(2, 1000, NULL);
-	
+
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -108,11 +111,11 @@ void CMFCProjectDlg::OnPaint()
 	{
 		//화면에 카드를 그리는 부분
 		CPaintDC dc(this);
-		char index;	
+		char index;
 		for (int i = 0; i < 36; i++) {
-			index = m_game_table[i] + 1;			
-			if (index == 0) continue;	
-			if (m_front_back == 0) index = 0;	
+			index = m_game_table[i] + 1;
+			if (index == 0) continue;
+			if (m_front_back == 0) index = 0;
 			m_card_list[index].Draw(dc, (i % 6) * 46, (i / 6) * 66);
 		}
 	}
@@ -132,7 +135,7 @@ void CMFCProjectDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 
 	CDialogEx::OnLButtonDown(nFlags, point);
-	if (m_front_back) return;		
+	if (m_front_back) return;
 
 	if (point.x < 46 * 6 && point.y < 66 * 6)
 	{
@@ -142,26 +145,35 @@ void CMFCProjectDlg::OnLButtonDown(UINT nFlags, CPoint point)
 
 		char index = m_game_table[num] + 1;
 
-		if (index == 0) return;	
+		if (index == 0) return;
 
 		CClientDC dc(this);
 		m_card_list[index].Draw(dc, x * 46, y * 66);
 
-		if (m_card_choice == -1) m_card_choice = num;	
+		if (m_card_choice == -1) m_card_choice = num;//아직 클릭이 되지 않았을때
 		else
 		{
-			if (m_card_choice != num)
+			if (m_card_choice != num)//카드가 선택되었을때
 			{
-				if (m_game_table[m_card_choice] == m_game_table[num])
+				if (m_game_table[m_card_choice] == m_game_table[num])//첫번째 카드와 두번째 카드가 같을때
 				{
+					m_count += 5;
 					m_game_table[m_card_choice] = -1;
 					m_game_table[num] = -1;
 					m_cardcount++;
-					m_current_score = m_cardcount * 5;//현재점수 = 뒤집은 카드의 개수 * 5
-					m_total_score = m_current_score + m_count * 10;//전체점수 = 뒤집은 카드의 개수 * 5 + 남은시간 * 10
+					m_combo++;
+					m_combo_score += m_combo * 1;
+					m_card_score = m_cardcount * 5;
+					m_current_score = m_card_score + m_combo_score;//현재점수 = 카드 스코어 + 콤보 스코어
+					m_total_score = m_current_score + m_count * 10;//전체점수 = 현재점수 + 남은시간 * 10
+					
+				}
+				else{
+					m_count --;
+					m_combo = 0;
 				}
 				m_card_choice = -1;
-				m_front_back = 1;		
+				m_front_back = 1;
 				SetTimer(1, 300, NULL);
 			}
 		}
@@ -172,11 +184,15 @@ void CMFCProjectDlg::OnLButtonDown(UINT nFlags, CPoint point)
 			CString score;
 			score.Format(_T("당신의 점수는 %d점 입니다."), m_total_score);
 			AfxMessageBox(score);
+			OnBnClickedCancel();
 		}
 	}
 	CString current_score;
 	current_score.Format(_T("점수:%d"), m_current_score);
 	m_score.SetWindowTextW(current_score);
+	CString current_combo;
+	current_combo.Format(_T("콤보x %d"), m_combo);
+	m_combo_level.SetWindowTextW(current_combo);
 }
 
 
@@ -185,16 +201,16 @@ void CMFCProjectDlg::OnTimer(UINT_PTR nIDEvent)
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (nIDEvent == 1)
 	{
-		KillTimer(1);	
-		m_front_back = 0;	
-		Invalidate();	
+		KillTimer(1);
+		m_front_back = 0;
+		Invalidate();
 	}
 	if (nIDEvent == 2)
 	{
 		CString lefttime;
 		lefttime.Format(_T("남은시간:%d"), m_count--);
 		if (m_count >= -1)
-			m_staticDisp.SetWindowTextW(lefttime);
+			m_timer.SetWindowTextW(lefttime);
 		else
 			KillTimer(2);
 	}
@@ -214,7 +230,7 @@ void CMFCProjectDlg::OnBnClickedButton1()
 		if (m_hint_flag > 0) {
 			m_front_back = 1;
 			Invalidate();
-			SetTimer(1, 800, NULL);
+			SetTimer(1, 2000, NULL);
 			m_hint_flag--;
 		}
 		else {
@@ -241,4 +257,17 @@ BOOL CMFCProjectDlg::OnEraseBkgnd(CDC* pDC)
 	pDC->FillSolidRect(rect, RGB(0, 100, 50));
 
 	return TRUE;
+}
+
+
+int CMFCProjectDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CDialogEx::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	// TODO:  여기에 특수화된 작성 코드를 추가합니다.
+	long style = ::GetWindowLong(this->m_hWnd, GWL_STYLE);
+	style &= ~WS_CAPTION;
+	::SetWindowLong(this->m_hWnd, GWL_STYLE, style);
+	return 0;
 }

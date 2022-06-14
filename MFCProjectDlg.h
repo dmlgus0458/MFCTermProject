@@ -40,13 +40,20 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnBnClickedCancel();
-	CStatic m_staticDisp;
+	CStatic m_timer;
 	CStatic m_score;
 	CStatic m_hintflag;
-	int m_count = 50;//게임 제한시간 설정
-	int m_hint_flag = 3;//힌트횟수 설정
+	CStatic m_combo_level;
+	int m_count = 60;//게임 제한시간 설정
+	int m_hint_flag = 10;//힌트횟수 설정
 	int m_total_score;//전체점수
 	int m_current_score;//현재점수
 	int m_cardcount = 0;//카드 짝을 맞춘 개수
+	int m_card_score = 0;
+	int m_combo = 0;
+	int m_combo_score = 0;
+
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	
 };
