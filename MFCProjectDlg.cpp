@@ -71,7 +71,9 @@ BOOL CMFCProjectDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-
+	//m_Progress_time.SetRange(0, 180);
+	//m_Progress_time.SetPos(180);
+	//SetTimer(3, 1000, NULL);
 	CString str;
 	//프로젝트안 res 폴더에 있는 카드이미지 들을 불러온다
 	for (int i = 0; i < 19; i++) {
@@ -214,6 +216,15 @@ void CMFCProjectDlg::OnTimer(UINT_PTR nIDEvent)
 		else
 			KillTimer(2);
 	}
+	/*if (nIDEvent == 3)
+{
+	int pos = m_Progress_time.GetPos();
+	if (pos > 0)
+	{
+		pos--;
+		m_Progress_time.SetPos(pos);
+	}
+}*/
 	if (m_count == -1) {
 		if (MessageBox(L"제한시간이 초과 되었습니다. 게임을 종료합니다.", L"시간초과", MB_ICONSTOP) == IDOK) {
 			OnBnClickedCancel();
